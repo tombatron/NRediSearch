@@ -29,7 +29,7 @@ namespace NRediSearch.Tests
             Db = null;
         }
 
-        protected Client GetClient([CallerFilePath] string filePath = null, [CallerMemberName] string caller = null)
+        protected Client GetClient([CallerFilePath] string filePath = null, [CallerMemberName] string caller = null, bool reset = true)
         {
             // Remove all that extra pathing
             var offset = filePath?.IndexOf("NRediSearch.Tests");
@@ -44,8 +44,17 @@ namespace NRediSearch.Tests
             Output.WriteLine("Key existed: " + exists);
 
             var client = new Client(indexName, Db);
-            var wasReset = Reset(client);
-            Output.WriteLine("Index was reset?: " + wasReset);
+
+            if (reset)
+            {
+                var wasReset = Reset(client);
+                Output.WriteLine("Index was reset?: " + wasReset);
+            }
+            else
+            {
+                Output.WriteLine("Index was reset?: False");
+            }
+
             return client;
         }
 
@@ -55,6 +64,7 @@ namespace NRediSearch.Tests
             try
             {
                 var result = client.DropIndex(); // tests create them
+
                 Output.WriteLine("  Result: " + result);
                 return result;
             }

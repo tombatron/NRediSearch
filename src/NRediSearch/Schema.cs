@@ -62,43 +62,48 @@ namespace NRediSearch
                 if (Unf) args.Add("UNF".Literal());
                 if (NoIndex) { args.Add("NOINDEX".Literal()); }
             }
+
+            public override string ToString() =>
+                $"Field{{name='{Name}', type={Type}, sortable={Sortable}, noindex={NoIndex}}}";
         }
 
         public class TextField : Field
         {
             public double Weight { get; }
             public bool NoStem { get; }
+            public string Phonetic { get; }
 
-            public TextField(string name, double weight, bool sortable, bool noStem, bool noIndex)
-            : this(name, weight, sortable, noStem, noIndex, false) { }
-
-            public TextField(string name, double weight = 1.0, bool sortable = false, bool noStem = false, bool noIndex = false, bool unNormalizedForm = false)
-            : base(name, FieldType.FullText, sortable, noIndex, unNormalizedForm)
+            public TextField(string name, double weight = 1.0, bool sortable = false, bool noStem = false, bool noIndex = false, string phonetic = null) : base(name, FieldType.FullText, sortable, noIndex)
             {
                 Weight = weight;
                 NoStem = noStem;
-            }
-
-            public TextField(FieldName name, double weight, bool sortable, bool noStem, bool noIndex)
-            : this(name, weight, sortable, noStem, noIndex, false) { }
-
-            public TextField(FieldName name, double weight = 1.0, bool sortable = false, bool noStem = false, bool noIndex = false, bool unNormalizedForm = false)
-            : base(name, FieldType.FullText, sortable, noIndex, unNormalizedForm)
-            {
-                Weight = weight;
-                NoStem = noStem;
+                Phonetic = phonetic;
             }
 
             internal override void SerializeRedisArgs(List<object> args)
             {
                 base.SerializeRedisArgs(args);
+
                 if (Weight != 1.0)
                 {
                     args.Add("WEIGHT".Literal());
                     args.Add(Weight);
                 }
-                if (NoStem) args.Add("NOSTEM".Literal());
+
+                if (NoStem)
+                {
+                    args.Add("NOSTEM".Literal());
+                }
+
+                if (Phonetic != null)
+                {
+                    args.Add("PHONETIC".Literal());
+                    args.Add(Phonetic);
+                }
             }
+
+            public override string ToString() =>
+                $"TextField{{name='{Name}', type={Type}, sortable={Sortable}, noindex={NoIndex}, weight={Weight}, nostem={NoStem}, phoenetic='{Phonetic}'}}";
         }
 
         public List<Field> Fields { get; } = new List<Field>();
@@ -277,6 +282,9 @@ namespace NRediSearch
                     if (Unf) args.Add("UNF".Literal());
                 }
             }
+
+            public override string ToString() =>
+                $"TagField{{name='{Name}', type={Type}, sortable={Sortable}, noindex={NoIndex}, separator='{Separator}'}}";
         }
 
         /// <summary>
